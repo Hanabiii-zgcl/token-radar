@@ -1,0 +1,39 @@
+name: refresh-token-radar
+
+# 高频刷新：每 3 小时一次 + 可手动触发。
+# 注意：OpenRouter rankings 底层是「每日」粒度聚合，3 小时一跑是为了尽快
+# 拿到当日结算后的最新值 + 快速发现新模型，不会凭空造出日内分辨率。
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 允许把刷新后的 data 提交回仓库
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest token data
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: python3 fetch.py
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "token-radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A data.js data/
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "data: refresh $(date -u +%FT%TZ)"
+            git push
+          fi
