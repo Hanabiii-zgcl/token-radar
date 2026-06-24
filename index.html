@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Token Radar · AI token 使用追踪</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="data.js"></script>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#141925; --panel2:#1b2230; --line:#222b3a;
+    --fg:#e6edf3; --mut:#8b97a8; --acc:#5b9dff; --good:#3fb950; --bad:#f85149;
+    --chip:#202a3a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;}
+  a{color:var(--acc);text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  h1{font-size:22px;margin:0;letter-spacing:.3px}
+  .sub{color:var(--mut);font-size:12.5px}
+  .meta{color:var(--mut);font-size:12px;margin:6px 0 18px}
+  .banner{background:#241c0e;border:1px solid #5a4413;color:#e8c97a;
+    padding:12px 14px;border-radius:10px;margin:14px 0;font-size:13px}
+  .banner code{background:#000;padding:2px 6px;border-radius:5px;color:#ffd479}
+  h2{font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;
+    margin:34px 0 12px;font-weight:600}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .v{font-size:26px;font-weight:700;letter-spacing:.3px}
+  .kpi .l{color:var(--mut);font-size:12px;margin-top:2px}
+  .kpi .d{font-size:11.5px;margin-top:4px}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}
+  @media(max-width:820px){.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h3{margin:0 0 2px;font-size:14px}
+  .card .cs{color:var(--mut);font-size:12px;margin-bottom:10px}
+  .chart{width:100%;height:300px}
+  .chart.tall{height:360px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .up{color:var(--good)} .down{color:var(--bad)}
+  .tag{display:inline-block;background:var(--chip);color:var(--mut);
+    border-radius:6px;padding:1px 7px;font-size:11px}
+  .footnote{color:var(--mut);font-size:11.5px;margin-top:10px;line-height:1.6}
+  .verified-no{color:#e8c97a}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Token Radar</h1>
+    <span class="sub">AI token 使用 · 多源追踪</span>
+  </header>
+  <div class="meta" id="meta"></div>
+  <div id="root"></div>
+  <div class="footnote">
+    口径说明：token 数来自各上游模型自己的 tokenizer，跨模型不严格可比。OpenRouter 数据是<b>第三方聚合层</b>——看结构与趋势，不代表市场总量。第一方(ChatGPT/Claude.ai/Gemini app)消费与直签企业大单不在其中，见下方「宏观口径」区。
+  </div>
+</div>
+<script>
+const D = window.__DATA__ || {};
+const $ = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
+const root = document.getElementById('root');
+
+// ---- number formatting ----
+function hum(n){
+  if(n==null||isNaN(n))return '—';
+  n=Number(n);
+  const u=[[1e15,'Q'],[1e12,'T'],[1e9,'B'],[1e6,'M'],[1e3,'K']];
+  for(const [v,s] of u){if(Math.abs(n)>=v){const x=n/v;return x.toFixed(x>=100?0:x>=10?1:2)+s;}}
+  return n.toLocaleString();
+}
+function dod(p){
+  if(p==null)return '';
+  const c=p>=0?'up':'down', s=p>=0?'▲':'▼';
+  return `<span class="${c}">${s}${Math.abs(p).toFixed(1)}%</span>`;
+}
+const PCOL={openai:'#10a37f',anthropic:'#d4a373',google:'#4285f4','x-ai':'#888',
+  deepseek:'#4d6bfe',qwen:'#7c3aed','meta-llama':'#0668E1',mistralai:'#ff7000',
+  'z-ai':'#e84393',minimax:'#00b894',nvidia:'#76b900',other:'#5a6678'};
+const pcol=(p)=>PCOL[p]||'#'+(Math.abs([...p].reduce((a,c)=>a*31+c.charCodeAt(0),7))%0xffffff|0x404040).toString(16).slice(0,6);
+
+// ---- meta line ----
+const gen = D.generated_at ? new Date(D.generated_at).toLocaleString('zh-CN',{hour12:false}) : '—';
+document.getElementById('meta').innerHTML =
+  `数据更新于 <b>${gen}</b> · 数据源：OpenRouter datasets + models · 刷新由定时任务驱动`;
+
+// ============================================================ key banner
+if(!D.has_key || !(D.rankings&&D.rankings.ok)){
+  let why = !D.has_key ? '未检测到 OPENROUTER_API_KEY' :
+            ('rankings 未就绪：'+(D.rankings&&D.rankings.reason||'unknown'));
+  root.appendChild($(`<div class="banner">
+    <b>Token 排名半区未点亮</b>（${why}）。设置环境变量 <code>OPENROUTER_API_KEY=sk-or-...</code> 后重跑
+    <code>python3 fetch.py</code>，即可填充每日 token 趋势、提供商份额、Top 模型、Top 应用。
+    免费在 openrouter.ai 注册可得 key。当前显示的是无需 key 的<b>模型 landscape</b>。
+  </div>`));
+}
+
+// ============================================================ KPI cards (landscape)
+const L = D.landscape||{};
+if(L.ok){
+  const price = L.median_prompt_price_per_m!=null ? '$'+L.median_prompt_price_per_m.toFixed(2) : '—';
+  const cards=[
+    ['模型总数', L.total_models, '当前 OpenRouter 在架'],
+    ['提供商', L.total_providers, '不同 author'],
+    ['近30天新增', L.new_30d, '新上架模型'],
+    ['近7天新增', L.new_7d, '新上架模型'],
+    ['推理模型', L.reasoning_models, '支持 reasoning 参数'],
+    ['中位 prompt 价', price, '$ / 1M tokens'],
+  ];
+  const wrap=$(`<div></div>`);
+  wrap.appendChild($(`<h2>模型 Landscape · 公开口径</h2>`));
+  const k=$(`<div class="kpis"></div>`);
+  cards.forEach(([l,v,d])=>k.appendChild($(`<div class="kpi"><div class="v">${typeof v==='number'?v.toLocaleString():v}</div><div class="l">${l}</div><div class="d" style="color:var(--mut)">${d}</div></div>`)));
+  wrap.appendChild(k);
+  root.appendChild(wrap);
+}
+
+// ============================================================ RANKINGS section
+const R = D.rankings||{};
+if(R.ok){
+  const sec=$(`<div></div>`);
+  const latest = R.latest_total!=null?hum(R.latest_total):'—';
+  sec.appendChild($(`<h2>Token 排名 · OpenRouter 第三方聚合（${R.date_range?R.date_range[0]+' → '+R.date_range[1]:''}）</h2>`));
+
+  // headline KPIs
+  const k=$(`<div class="kpis" style="margin-bottom:16px"></div>`);
+  k.appendChild($(`<div class="kpi"><div class="v">${latest}</div><div class="l">最新日 token 总量(Top50)</div><div class="d" style="color:var(--mut)">${R.latest_date||''}</div></div>`));
+  k.appendChild($(`<div class="kpi"><div class="v">${R.providers_tracked?R.providers_tracked.length:0}</div><div class="l">追踪提供商</div><div class="d" style="color:var(--mut)">其余归 other</div></div>`));
+  if(R.total_series&&R.total_series.length>1){
+    const a=R.total_series[R.total_series.length-1].tokens, b=R.total_series[0].tokens;
+    const g=b?((a-b)/b*100):null;
+    k.appendChild($(`<div class="kpi"><div class="v">${g==null?'—':(g>=0?'+':'')+g.toFixed(0)+'%'}</div><div class="l">区间累计变化</div><div class="d">${dod(g)}</div></div>`));
+  }
+  sec.appendChild(k);
+
+  // charts grid
+  const g=$(`<div class="grid g2"></div>`);
+  g.appendChild($(`<div class="card"><h3>每日 token 总量</h3><div class="cs">Top50 模型合计 · 单位按需缩放</div><div id="c_total" class="chart"></div></div>`));
+  g.appendChild($(`<div class="card"><h3>提供商 token 份额</h3><div class="cs">堆叠 · 谁在涨谁在跌</div><div id="c_prov" class="chart"></div></div>`));
+  sec.appendChild(g);
+
+  // top models table
+  const tcard=$(`<div class="card" style="margin-top:16px"><h3>最新日 Top 模型</h3><div class="cs">按 token 量 · 含日环比</div></div>`);
+  const tbl=$(`<table><thead><tr><th>#</th><th>模型</th><th>提供商</th><th class="num">Token</th><th class="num">日环比</th></tr></thead><tbody></tbody></table>`);
+  const tb=tbl.querySelector('tbody');
+  (R.top_models||[]).forEach((m,i)=>{
+    tb.appendChild($(`<tr><td class="num">${i+1}</td><td>${m.model}</td><td><span class="tag">${m.provider}</span></td><td class="num">${hum(m.tokens)}</td><td class="num">${dod(m.dod_pct)}</td></tr>`));
+  });
+  tcard.appendChild(tbl);
+  sec.appendChild(tcard);
+  root.appendChild(sec);
+
+  // render total series
+  echarts.init(document.getElementById('c_total'),'dark',{renderer:'canvas'}).setOption(baseLine(
+    R.total_series.map(d=>d.date),
+    [{name:'tokens',type:'line',smooth:true,areaStyle:{opacity:.18},
+      lineStyle:{width:2,color:'#5b9dff'},itemStyle:{color:'#5b9dff'},showSymbol:false,
+      data:R.total_series.map(d=>d.tokens)}]));
+
+  // render provider stacked
+  const provs=R.providers_tracked;
+  const series=provs.map(p=>({name:p,type:'line',stack:'t',smooth:true,
+    areaStyle:{opacity:.55},lineStyle:{width:0},showSymbol:false,
+    itemStyle:{color:pcol(p)},
+    data:R.provider_series.map(d=>d[p]||0)}));
+  echarts.init(document.getElementById('c_prov'),'dark').setOption({
+    ...baseGrid(), legend:{top:0,textStyle:{color:'#8b97a8',fontSize:10},type:'scroll'},
+    tooltip:{trigger:'axis',valueFormatter:hum,axisPointer:{type:'shadow'}},
+    xAxis:{type:'category',data:R.provider_series.map(d=>d.date),axisLabel:{color:'#8b97a8',fontSize:10}},
+    yAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:hum},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series});
+}
+
+// ============================================================ APPS
+const A = D.apps||{};
+if(A.ok && A.apps && A.apps.length){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>应用排名 · 按 token 用量（trailing 7d）</h2>`));
+  const g=$(`<div class="grid g2"></div>`);
+  g.appendChild($(`<div class="card"><h3>Top 应用</h3><div class="cs">哪个 app/agent 在烧 token</div><div id="c_apps" class="chart tall"></div></div>`));
+  const tcard=$(`<div class="card"><h3>明细</h3><div class="cs">token 与请求数</div></div>`);
+  const tbl=$(`<table><thead><tr><th>#</th><th>应用</th><th class="num">Token</th><th class="num">请求</th></tr></thead><tbody></tbody></table>`);
+  const tb=tbl.querySelector('tbody');
+  A.apps.slice(0,15).forEach(a=>tb.appendChild($(`<tr><td class="num">${a.rank}</td><td>${a.name}</td><td class="num">${hum(a.tokens)}</td><td class="num">${hum(a.requests)}</td></tr>`)));
+  tcard.appendChild(tbl);
+  g.appendChild(tcard);
+  sec.appendChild(g);
+  root.appendChild(sec);
+  const top=A.apps.slice(0,12).reverse();
+  echarts.init(document.getElementById('c_apps'),'dark').setOption({
+    ...baseGrid({left:140}), tooltip:{trigger:'axis',valueFormatter:hum,axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:hum},splitLine:{lineStyle:{color:'#222b3a'}}},
+    yAxis:{type:'category',data:top.map(a=>a.name),axisLabel:{color:'#c9d4e2',fontSize:11}},
+    series:[{type:'bar',data:top.map(a=>a.tokens),itemStyle:{color:'#5b9dff',borderRadius:[0,4,4,0]}}]});
+}
+
+// ============================================================ LANDSCAPE charts
+if(L.ok){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>模型动态 · 公开口径</h2>`));
+  const g=$(`<div class="grid g2"></div>`);
+  g.appendChild($(`<div class="card"><h3>新模型上架（按月）</h3><div class="cs">来自 models.created · 近24月</div><div id="c_launch" class="chart"></div></div>`));
+  g.appendChild($(`<div class="card"><h3>提供商模型数</h3><div class="cs">在架模型计数 Top15</div><div id="c_mix" class="chart"></div></div>`));
+  sec.appendChild(g);
+  root.appendChild(sec);
+
+  echarts.init(document.getElementById('c_launch'),'dark').setOption({
+    ...baseGrid(), tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'category',data:L.launches_by_month.map(d=>d.month),axisLabel:{color:'#8b97a8',fontSize:10,rotate:45}},
+    yAxis:{type:'value',axisLabel:{color:'#8b97a8'},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series:[{type:'bar',data:L.launches_by_month.map(d=>d.count),itemStyle:{color:'#3fb950',borderRadius:[3,3,0,0]}}]});
+
+  const mix=L.provider_mix.slice().reverse();
+  echarts.init(document.getElementById('c_mix'),'dark').setOption({
+    ...baseGrid({left:90}), tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',axisLabel:{color:'#8b97a8'},splitLine:{lineStyle:{color:'#222b3a'}}},
+    yAxis:{type:'category',data:mix.map(d=>d.provider),axisLabel:{color:'#c9d4e2',fontSize:11}},
+    series:[{type:'bar',data:mix.map(d=>d.models),itemStyle:{color:(p)=>pcol(mix[p.dataIndex].provider),borderRadius:[0,4,4,0]}}]});
+}
+
+// ============================================================ MACRO
+const M = D.macro||[];
+if(M.length){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>宏观口径 · 第一方/全市场背景（人工维护）</h2>`));
+  const card=$(`<div class="card"></div>`);
+  const tbl=$(`<table><thead><tr><th>指标</th><th>数值</th><th>时点</th><th>来源</th><th>说明</th></tr></thead><tbody></tbody></table>`);
+  const tb=tbl.querySelector('tbody');
+  M.forEach(m=>tb.appendChild($(`<tr><td>${m.label}</td><td class="num"><b>${m.value}</b></td><td>${m.as_of||''}</td><td>${m.source||''}${m.verified===false?' <span class="tag verified-no">待核实</span>':''}</td><td style="color:var(--mut);font-size:12px">${m.note||''}</td></tr>`)));
+  card.appendChild(tbl);
+  card.appendChild($(`<div class="footnote">这些是<b>非自动</b>、需人工核实的参考量，编辑 <code style="color:#ffd479">data/macro.json</code> 维护。用于把 OpenRouter 的聚合层放回市场总量背景里。</div>`));
+  sec.appendChild(card);
+  root.appendChild(sec);
+}
+
+// ---- chart helpers ----
+function baseGrid(o={}){return{grid:{left:o.left||50,right:20,top:o.top||28,bottom:o.bottom||40},
+  backgroundColor:'transparent'};}
+function baseLine(x,series){return{...baseGrid(),
+  tooltip:{trigger:'axis',valueFormatter:hum},
+  xAxis:{type:'category',data:x,boundaryGap:false,axisLabel:{color:'#8b97a8',fontSize:10}},
+  yAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:hum},splitLine:{lineStyle:{color:'#222b3a'}}},
+  series};}
+
+window.addEventListener('resize',()=>{document.querySelectorAll('.chart').forEach(el=>{
+  const inst=echarts.getInstanceByDom(el); if(inst)inst.resize();});});
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+本地 macOS 高频刷新（不靠 GitHub）。装法：
+  1) 编辑下面的 OPENROUTER_API_KEY 和路径
+  2) cp com.tokenradar.refresh.plist ~/Library/LaunchAgents/
+  3) launchctl load ~/Library/LaunchAgents/com.tokenradar.refresh.plist
+每 3 小时(10800s)跑一次 fetch.py。看板直接双击 index.html 即可(data.js 用 <script src> 加载，file:// 也能读)。
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.tokenradar.refresh</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/zhugechenglong/workspace/token-radar/fetch.py</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>OPENROUTER_API_KEY</key><string>sk-or-REPLACE_ME</string>
+  </dict>
+  <key>StartInterval</key><integer>10800</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardErrorPath</key><string>/tmp/tokenradar.err.log</string>
+  <key>StandardOutPath</key><string>/tmp/tokenradar.out.log</string>
+</dict>
+</plist>
