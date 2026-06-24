@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T13:15:11.452556+00:00",
+  "generated_at": "2026-06-24T13:30:58.764086+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-24T13:15:15.682Z",
+    "as_of": "2026-06-24T13:30:59.894Z",
     "latest_date": "2026-06-23",
     "date_range": [
       "2026-03-26",
@@ -1685,7 +1685,7 @@
       },
       {
         "rank": 8,
-        "name": "Pioneer (production)",
+        "name": "Pioneer (staging)",
         "tokens": 302177247697,
         "requests": 6070704
       },
@@ -1715,7 +1715,7 @@
       },
       {
         "rank": 13,
-        "name": "Mira",
+        "name": "Mira is the leading AI agent inside Telegram",
         "tokens": 110991628290,
         "requests": 5936519
       },
@@ -1792,7 +1792,7 @@
         "requests": 1083914
       }
     ],
-    "as_of": "2026-06-24T13:15:18.860Z"
+    "as_of": "2026-06-24T13:31:00.703Z"
   },
   "macro": [
     {
