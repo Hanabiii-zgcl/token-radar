@@ -24,6 +24,22 @@
     "verified": false
   },
   {
+    "label": "字节豆包 日均 token 调用量",
+    "value": "180万亿 / 日",
+    "as_of": "2026-06",
+    "source": "火山引擎 Force 大会披露(网易 2026-06-24)",
+    "note": "日频口径；年增>10x。换算约 5,400万亿/月(≈5.4 quadrillion/月)，量级与 Google 月度相当。轨迹: 2025-12末 63万亿/日 → 2026-03 120万亿/日 → 2026-06 180万亿/日",
+    "verified": true
+  },
+  {
+    "label": "豆包/火山引擎 中国 MaaS 份额",
+    "value": "49.5%",
+    "as_of": "2026-06",
+    "source": "火山引擎披露(IDC口径)",
+    "note": "中国公有云大模型(MaaS)市场 token 份额，居首",
+    "verified": false
+  },
+  {
     "label": "OpenRouter 周处理量",
     "value": "33T+ / 周",
     "as_of": "2026-06",
