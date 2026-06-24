@@ -121,12 +121,25 @@ if(G.series && Object.keys(G.series).length){
     card.appendChild($(`<div id="c_gpu_multi" class="chart" style="height:250px"></div>`));
     if(HM.note) card.appendChild($(`<div class="footnote">${HM.note}</div>`));
     const COLS={'Compute Desk (Hopper US)':'#5b9dff','Silicon Data (SDH100RT)':'#e8884a','Ornn (ORNNH100)':'#46c46a','SemiAnalysis (1Y contract)':'#a982e6'};
-    const mseries=Object.keys(HM.series).map(nm=>({name:nm,type:'line',smooth:true,showSymbol:false,
-      lineStyle:{width:1.6,color:COLS[nm]||'#999'},itemStyle:{color:COLS[nm]||'#999'},
-      data:HM.series[nm].map(p=>[p.date,p.price])}));
+    const estFrom = HM.estimate_from||{};
+    const legendData=Object.keys(HM.series);
+    const mseries=[];
+    legendData.forEach(nm=>{
+      const col=COLS[nm]||'#999', pts=HM.series[nm], ef=estFrom[nm];
+      const xy=(arr)=>arr.map(p=>[p.date,p.price]);
+      if(ef){
+        mseries.push({name:nm,type:'line',smooth:true,showSymbol:false,
+          lineStyle:{width:1.6,color:col},itemStyle:{color:col},data:xy(pts.filter(p=>p.date<=ef))});
+        mseries.push({name:nm+'·估算',type:'line',smooth:true,showSymbol:false,
+          lineStyle:{width:1.6,color:col,type:'dashed'},itemStyle:{color:col},data:xy(pts.filter(p=>p.date>=ef))});
+      } else {
+        mseries.push({name:nm,type:'line',smooth:true,showSymbol:false,
+          lineStyle:{width:1.6,color:col},itemStyle:{color:col},data:xy(pts)});
+      }
+    });
     echarts.init(document.getElementById('c_gpu_multi'),'dark').setOption({
       grid:{left:48,right:16,top:48,bottom:22},
-      legend:{top:2,textStyle:{color:'#8b97a8',fontSize:10},type:'scroll'},
+      legend:{data:legendData,top:2,textStyle:{color:'#8b97a8',fontSize:10},type:'scroll'},
       tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toFixed(2):'—'},
       xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
       yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v.toFixed(2)},splitLine:{lineStyle:{color:'#222b3a'}}},
