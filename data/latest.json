@@ -1685,7 +1685,7 @@
       },
       {
         "rank": 8,
-        "name": "Pioneer (production)",
+        "name": "Pioneer (staging)",
         "tokens": 302177247697,
         "requests": 6070704
       },
@@ -1715,7 +1715,7 @@
       },
       {
         "rank": 13,
-        "name": "Mira",
+        "name": "Mira is the leading AI agent inside Telegram",
         "tokens": 110991628290,
         "requests": 5936519
       },
