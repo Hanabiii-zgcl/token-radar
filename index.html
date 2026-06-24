@@ -63,7 +63,10 @@
   </div>
 </div>
 <script>
-const D = window.__DATA__ || {};
+(async function(){
+let D;
+try{ const _r = await fetch('data/latest.json?ts=' + Date.now(), {cache:'no-store'}); D = _r.ok ? await _r.json() : (window.__DATA__ || {}); }
+catch(_e){ D = window.__DATA__ || {}; }
 const $ = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
 const root = document.getElementById('root');
 
@@ -306,6 +309,7 @@ function baseLine(x,series){return{...baseGrid(),
 
 window.addEventListener('resize',()=>{document.querySelectorAll('.chart').forEach(el=>{
   const inst=echarts.getInstanceByDom(el); if(inst)inst.resize();});});
+})();
 </script>
 </body>
 </html>
