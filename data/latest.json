@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T19:41:45.219603+00:00",
+  "generated_at": "2026-06-24T22:14:03.996774+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-24T19:41:46.310Z",
+    "as_of": "2026-06-24T22:14:04.823Z",
     "latest_date": "2026-06-23",
     "date_range": [
       "2026-03-26",
@@ -1685,7 +1685,7 @@
       },
       {
         "rank": 8,
-        "name": "Pioneer (production)",
+        "name": "Pioneer (development)",
         "tokens": 302177247697,
         "requests": 6070704
       },
@@ -1792,7 +1792,7 @@
         "requests": 1083914
       }
     ],
-    "as_of": "2026-06-24T19:41:47.869Z"
+    "as_of": "2026-06-24T22:14:05.913Z"
   },
   "macro": [
     {
