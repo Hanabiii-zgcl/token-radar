@@ -117,9 +117,8 @@ if(G.series && Object.keys(G.series).length){
 
   const HM = G.h100_multi;
   if(HM && HM.series){
-    card.appendChild($(`<div style="font-size:12px;color:#8b97a8;margin:20px 0 2px">H100 四家指数对比 · <span style="color:#e8c97a">常年不收敛</span>${HM.range?(' · '+HM.range):''}</div>`));
+    card.appendChild($(`<div style="font-size:12px;color:#8b97a8;margin:20px 0 2px">H100 四家指数 · <span style="color:#e8c97a">不收敛</span></div>`));
     card.appendChild($(`<div id="c_gpu_multi" class="chart" style="height:250px"></div>`));
-    if(HM.note) card.appendChild($(`<div class="footnote">${HM.note}</div>`));
     const COLS={'Compute Desk (Hopper US)':'#5b9dff','Silicon Data (SDH100RT)':'#e8884a','Ornn (ORNNH100)':'#46c46a','SemiAnalysis (1Y contract)':'#a982e6'};
     const estFrom = HM.estimate_from||{};
     const legendData=Object.keys(HM.series);
