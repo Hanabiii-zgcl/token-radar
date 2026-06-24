@@ -88,7 +88,31 @@ const pcol=(p)=>PCOL[p]||'#'+(Math.abs([...p].reduce((a,c)=>a*31+c.charCodeAt(0)
 // ---- meta line ----
 const gen = D.generated_at ? new Date(D.generated_at).toLocaleString('zh-CN',{hour12:false}) : '—';
 document.getElementById('meta').innerHTML =
-  `数据更新于 <b>${gen}</b> · 数据源：OpenRouter datasets + models · 刷新由定时任务驱动`;
+  `数据更新于 <b>${gen}</b> · 数据源：OpenRouter datasets + models + Silicon Data(GPU) · 刷新由定时任务驱动`;
+
+// ============================================================ GPU rental (TOP)
+const G = D.gpu||{};
+if(G.series && Object.keys(G.series).length){
+  const sec=$(`<div></div>`);
+  const vtag = G.verified===false ? ' <span class="tag" style="color:#e8c97a">数字化·待 Bloomberg 校准</span>' : '';
+  sec.appendChild($(`<h2>GPU 租赁价 · Silicon Data (Bloomberg)${vtag}</h2>`));
+  const card=$(`<div class="card"><h3>H100 / B200 日租金 · $/GPU-hr</h3><div class="cs">${G.source||''} · 截至 ${G.as_of||''}</div><div id="c_gpu" class="chart tall"></div></div>`);
+  sec.appendChild(card);
+  sec.appendChild($(`<div class="footnote">${G.method||''}。注: 四家指数(Silicon Data / Ornn / Compute Desk / SemiAnalysis)方法论不同、常年不收敛——单一指数不等于「GPU 价格」。</div>`));
+  root.appendChild(sec);
+  const names=Object.keys(G.series);
+  const xs=G.series[names[0]].map(p=>p.date);
+  const COL=['#5b9dff','#e0833f','#3fb950','#b07cf0'];
+  const series=names.map((nm,i)=>({name:nm,type:'line',smooth:true,showSymbol:false,
+    lineStyle:{width:2,color:COL[i%4]},itemStyle:{color:COL[i%4]},
+    data:G.series[nm].map(p=>p.price)}));
+  echarts.init(document.getElementById('c_gpu'),'dark').setOption({
+    ...baseGrid({top:36}), legend:{top:6,textStyle:{color:'#8b97a8',fontSize:11}},
+    tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+v.toFixed(2):'—'},
+    xAxis:{type:'category',data:xs,boundaryGap:false,axisLabel:{color:'#8b97a8',fontSize:10}},
+    yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v.toFixed(1)},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series});
+}
 
 // ============================================================ key banner
 if(!D.has_key || !(D.rankings&&D.rankings.ok)){

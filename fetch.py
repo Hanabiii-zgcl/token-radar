@@ -272,6 +272,18 @@ def load_macro():
     return []
 
 
+def load_gpu():
+    """Hand-maintained GPU rental-price series (Silicon Data SDH100RT/SDB200RT,
+    Bloomberg-sourced). Edit data/gpu.json — colleague refreshes from Bloomberg."""
+    p = os.path.join(DATA_DIR, "gpu.json")
+    if os.path.exists(p):
+        try:
+            return json.load(open(p))
+        except Exception as e:
+            log("gpu.json parse error:", e)
+    return {}
+
+
 # ---------------------------------------------------------------- io
 def _save_snapshot(kind, rows):
     os.makedirs(SNAP_DIR, exist_ok=True)
@@ -289,6 +301,7 @@ def main():
         "rankings": build_rankings(),
         "apps": build_apps(),
         "macro": load_macro(),
+        "gpu": load_gpu(),
     }
     # data.js: loadable via <script src> so the dashboard works by double-click
     # (file://) with zero server, AND over http for GitHub Pages.
