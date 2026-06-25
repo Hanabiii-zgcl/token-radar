@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-06-25T17:09:45.529837+00:00",
+  "generated_at": "2026-06-25T19:54:38.536256+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
     "total_models": 339,
     "total_providers": 56,
-    "new_7d": 4,
+    "new_7d": 3,
     "new_30d": 18,
     "reasoning_models": 196,
     "median_prompt_price_per_m": 0.435,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-25T17:09:46.096Z",
+    "as_of": "2026-06-25T19:54:39.297Z",
     "latest_date": "2026-06-24",
     "date_range": [
       "2026-03-27",
@@ -1686,7 +1686,7 @@
       },
       {
         "rank": 8,
-        "name": "Pioneer (development)",
+        "name": "Pioneer (production)",
         "tokens": 311051031123,
         "requests": 5868012
       },
@@ -1793,7 +1793,7 @@
         "requests": 1174610
       }
     ],
-    "as_of": "2026-06-25T17:09:47.036Z"
+    "as_of": "2026-06-25T19:54:40.460Z"
   },
   "macro": [
     {
