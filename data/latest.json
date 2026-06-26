@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T06:57:15.109088+00:00",
+  "generated_at": "2026-06-26T11:43:07.330157+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-26T06:57:16.189Z",
+    "as_of": "2026-06-26T11:43:07.840Z",
     "latest_date": "2026-06-25",
     "date_range": [
       "2026-03-28",
@@ -1723,7 +1723,7 @@
       },
       {
         "rank": 14,
-        "name": "Mira",
+        "name": "Mira is the leading AI agent inside Telegram",
         "tokens": 104386549893,
         "requests": 5697953
       },
@@ -1789,12 +1789,12 @@
       },
       {
         "rank": 25,
-        "name": "llmv:competitors",
+        "name": "llmv:snappy_summary",
         "tokens": 58882189703,
         "requests": 24456087
       }
     ],
-    "as_of": "2026-06-26T06:57:17.227Z"
+    "as_of": "2026-06-26T11:43:09.060Z"
   },
   "macro": [
     {
