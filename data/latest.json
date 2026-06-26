@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T19:42:40.662127+00:00",
+  "generated_at": "2026-06-26T22:09:13.057001+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-26T19:42:41.185Z",
+    "as_of": "2026-06-26T22:09:13.702Z",
     "latest_date": "2026-06-25",
     "date_range": [
       "2026-03-28",
@@ -1687,7 +1687,7 @@
       },
       {
         "rank": 8,
-        "name": "Pioneer (production)",
+        "name": "Pioneer (local)",
         "tokens": 324455845636,
         "requests": 5817909
       },
@@ -1789,12 +1789,12 @@
       },
       {
         "rank": 25,
-        "name": "llmv:competitors",
+        "name": "llmv:sentiment",
         "tokens": 58882189703,
         "requests": 24456087
       }
     ],
-    "as_of": "2026-06-26T19:42:42.554Z"
+    "as_of": "2026-06-26T22:09:14.657Z"
   },
   "macro": [
     {
