@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T14:16:50.279141+00:00",
+  "generated_at": "2026-06-26T16:58:41.308084+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,7 +172,7 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-26T14:16:50.981Z",
+    "as_of": "2026-06-26T16:58:42.167Z",
     "latest_date": "2026-06-25",
     "date_range": [
       "2026-03-28",
@@ -1789,12 +1789,12 @@
       },
       {
         "rank": 25,
-        "name": "llmv:queries",
+        "name": "llmv:competitors",
         "tokens": 58882189703,
         "requests": 24456087
       }
     ],
-    "as_of": "2026-06-26T14:16:52.249Z"
+    "as_of": "2026-06-26T16:58:45.280Z"
   },
   "macro": [
     {
