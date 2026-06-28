@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-27T22:00:10.059338+00:00",
+  "generated_at": "2026-06-28T03:27:28.125024+00:00",
   "has_key": true,
   "landscape": {
     "ok": true,
@@ -172,11 +172,11 @@
   },
   "rankings": {
     "ok": true,
-    "as_of": "2026-06-27T22:00:10.817Z",
-    "latest_date": "2026-06-26",
+    "as_of": "2026-06-28T03:27:28.650Z",
+    "latest_date": "2026-06-27",
     "date_range": [
-      "2026-03-29",
-      "2026-06-26"
+      "2026-03-30",
+      "2026-06-27"
     ],
     "providers_tracked": [
       "anthropic",
@@ -189,10 +189,6 @@
       "other"
     ],
     "total_series": [
-      {
-        "date": "2026-03-29",
-        "tokens": 3003775803833
-      },
       {
         "date": "2026-03-30",
         "tokens": 3465259816762
@@ -548,19 +544,13 @@
       {
         "date": "2026-06-26",
         "tokens": 6781230881257
+      },
+      {
+        "date": "2026-06-27",
+        "tokens": 5693223309336
       }
     ],
     "provider_series": [
-      {
-        "date": "2026-03-29",
-        "xiaomi": 809220758584,
-        "deepseek": 201480200260,
-        "minimax": 246291120567,
-        "anthropic": 292292315427,
-        "google": 317249530892,
-        "openai": 195896144579,
-        "other": 941345733524
-      },
       {
         "date": "2026-03-30",
         "xiaomi": 829137652154,
@@ -1515,131 +1505,142 @@
         "openai": 499643716641,
         "google": 571051094467,
         "other": 2055077539433
+      },
+      {
+        "date": "2026-06-27",
+        "deepseek": 960095081973,
+        "xiaomi": 610394598055,
+        "tencent": 492963681321,
+        "minimax": 416833299452,
+        "anthropic": 565146174131,
+        "openai": 319590108389,
+        "google": 447549619029,
+        "other": 1880650746986
       }
     ],
     "top_models": [
       {
         "model": "deepseek/deepseek-v4-flash-20260423",
         "provider": "deepseek",
-        "tokens": 639793447310,
-        "dod_pct": -4.852653107516973
+        "tokens": 627004472008,
+        "dod_pct": -1.9989225203494998
       },
       {
         "model": "xiaomi/mimo-v2.5-20260422",
         "provider": "xiaomi",
-        "tokens": 629223208709,
-        "dod_pct": -2.0133285164119874
-      },
-      {
-        "model": "tencent/hy3-preview-20260421",
-        "provider": "tencent",
-        "tokens": 527467786405,
-        "dod_pct": 9.04705221668271
+        "tokens": 547586053992,
+        "dod_pct": -12.974275835199705
       },
       {
         "model": "openrouter/owl-alpha",
         "provider": "openrouter",
-        "tokens": 521224758113,
-        "dod_pct": -6.738187482884839
+        "tokens": 515055686829,
+        "dod_pct": -1.1835721899193752
+      },
+      {
+        "model": "tencent/hy3-preview-20260421",
+        "provider": "tencent",
+        "tokens": 492963681321,
+        "dod_pct": -6.5414620519606625
       },
       {
         "model": "minimax/minimax-m3-20260531",
         "provider": "minimax",
-        "tokens": 435168290296,
-        "dod_pct": -19.587447511544752
-      },
-      {
-        "model": "z-ai/glm-5.2-20260616",
-        "provider": "z-ai",
-        "tokens": 364099224540,
-        "dod_pct": 12.30067321706941
+        "tokens": 401553339063,
+        "dod_pct": -7.724586552511726
       },
       {
         "model": "deepseek/deepseek-v4-pro-20260423",
         "provider": "deepseek",
-        "tokens": 354788654355,
-        "dod_pct": 14.768065159470051
+        "tokens": 272796745281,
+        "dod_pct": -23.11007076115778
       },
       {
-        "model": "anthropic/claude-4.8-opus-20260528",
-        "provider": "anthropic",
-        "tokens": 300551729599,
-        "dod_pct": -7.757924582623238
-      },
-      {
-        "model": "anthropic/claude-4.7-opus-20260416",
-        "provider": "anthropic",
-        "tokens": 287057790279,
-        "dod_pct": -5.10530588939661
-      },
-      {
-        "model": "anthropic/claude-4.6-sonnet-20260217",
-        "provider": "anthropic",
-        "tokens": 225689241102,
-        "dod_pct": -10.148666950722053
+        "model": "z-ai/glm-5.2-20260616",
+        "provider": "z-ai",
+        "tokens": 269312337411,
+        "dod_pct": -26.033257074016834
       },
       {
         "model": "stepfun/step-3.7-flash-20260528",
         "provider": "stepfun",
-        "tokens": 200442250220,
-        "dod_pct": 4.047079305778832
+        "tokens": 209717838706,
+        "dod_pct": 4.627561542448942
       },
       {
-        "model": "openai/gpt-5.5-20260423",
-        "provider": "openai",
-        "tokens": 185717814319,
-        "dod_pct": 38.209495631718696
+        "model": "anthropic/claude-4.7-opus-20260416",
+        "provider": "anthropic",
+        "tokens": 189728717899,
+        "dod_pct": -33.90574151825073
       },
       {
-        "model": "google/gemini-3-flash-preview-20251217",
-        "provider": "google",
-        "tokens": 132073921564,
-        "dod_pct": -4.493210800831183
+        "model": "anthropic/claude-4.8-opus-20260528",
+        "provider": "anthropic",
+        "tokens": 180999925442,
+        "dod_pct": -39.77744673654268
       },
       {
-        "model": "google/gemini-2.5-flash-lite",
-        "provider": "google",
-        "tokens": 88237147902,
-        "dod_pct": -9.819095123401565
+        "model": "anthropic/claude-4.6-sonnet-20260217",
+        "provider": "anthropic",
+        "tokens": 143633289239,
+        "dod_pct": -36.357936896918766
       },
       {
         "model": "nvidia/nemotron-3-ultra-550b-a55b-20260604:free",
         "provider": "nvidia",
-        "tokens": 83095967158,
-        "dod_pct": -15.182405581052327
+        "tokens": 132239698850,
+        "dod_pct": 59.14093472016195
       },
       {
-        "model": "google/gemini-2.5-flash",
-        "provider": "google",
-        "tokens": 82617916696,
-        "dod_pct": -1.7705237353158227
-      },
-      {
-        "model": "openai/gpt-4o-mini",
+        "model": "openai/gpt-5.5-20260423",
         "provider": "openai",
-        "tokens": 78163357263,
-        "dod_pct": 63.96220734246248
-      },
-      {
-        "model": "deepseek/deepseek-v3.2-20251201",
-        "provider": "deepseek",
-        "tokens": 78088777849,
-        "dod_pct": -39.33262932361284
+        "tokens": 117360634556,
+        "dod_pct": -36.807012840236006
       },
       {
         "model": "poolside/laguna-m.1-20260312:free",
         "provider": "poolside",
-        "tokens": 76880737580,
-        "dod_pct": 5.580544023517134
+        "tokens": 115261243533,
+        "dod_pct": 49.92213545436176
+      },
+      {
+        "model": "google/gemini-3-flash-preview-20251217",
+        "provider": "google",
+        "tokens": 108103229060,
+        "dod_pct": -18.149451625379616
+      },
+      {
+        "model": "google/gemini-2.5-flash-lite",
+        "provider": "google",
+        "tokens": 74453346381,
+        "dod_pct": -15.621313526938662
+      },
+      {
+        "model": "google/gemini-2.5-flash",
+        "provider": "google",
+        "tokens": 63563489711,
+        "dod_pct": -23.063310897940532
       },
       {
         "model": "xiaomi/mimo-v2.5-pro-20260422",
         "provider": "xiaomi",
-        "tokens": 69587710276,
-        "dod_pct": 3.3426873885209014
+        "tokens": 62808544063,
+        "dod_pct": -9.741901531337001
+      },
+      {
+        "model": "deepseek/deepseek-v3.2-20251201",
+        "provider": "deepseek",
+        "tokens": 60293864684,
+        "dod_pct": -22.788054385240812
+      },
+      {
+        "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+        "provider": "nvidia",
+        "tokens": 55188522569,
+        "dod_pct": -4.9757332967836145
       }
     ],
-    "latest_total": 6781230881257
+    "latest_total": 5693223309336
   },
   "apps": {
     "ok": true,
@@ -1647,155 +1648,155 @@
       {
         "rank": 1,
         "name": "Hermes Agent",
-        "tokens": 6835623837796,
-        "requests": 90754405
+        "tokens": 6925740826978,
+        "requests": 91614195
       },
       {
         "rank": 2,
         "name": "Kilo Code",
-        "tokens": 1686533604684,
-        "requests": 27256436
+        "tokens": 1734130527072,
+        "requests": 28166351
       },
       {
         "rank": 3,
         "name": "OpenClaw",
-        "tokens": 1151279300996,
-        "requests": 21630616
+        "tokens": 1140586233679,
+        "requests": 21295771
       },
       {
         "rank": 4,
         "name": "Claude Code",
-        "tokens": 979723405204,
-        "requests": 10792031
+        "tokens": 993440302046,
+        "requests": 10873888
       },
       {
         "rank": 5,
         "name": "Descript",
-        "tokens": 485341692402,
-        "requests": 6806276
+        "tokens": 484391580919,
+        "requests": 6789708
       },
       {
         "rank": 6,
         "name": "Cline",
-        "tokens": 435182759092,
-        "requests": 4455795
+        "tokens": 434795462434,
+        "requests": 4454106
       },
       {
         "rank": 7,
         "name": "pi",
-        "tokens": 419687348495,
-        "requests": 7491652
+        "tokens": 426154951350,
+        "requests": 7542740
       },
       {
         "rank": 8,
-        "name": "Pioneer (development)",
-        "tokens": 350431176692,
-        "requests": 5653717
+        "name": "Pioneer (production)",
+        "tokens": 369628552078,
+        "requests": 5409126
       },
       {
         "rank": 9,
         "name": "Janitor AI",
-        "tokens": 225480112187,
-        "requests": 16267471
+        "tokens": 225564256844,
+        "requests": 16294575
       },
       {
         "rank": 10,
         "name": "ISEKAI ZERO",
-        "tokens": 216181969845,
-        "requests": 5073621
+        "tokens": 215324516500,
+        "requests": 5090472
       },
       {
         "rank": 11,
         "name": "Lemonade",
-        "tokens": 213697382681,
-        "requests": 6330751
+        "tokens": 209395231749,
+        "requests": 6127733
       },
       {
         "rank": 12,
         "name": "Pieces.app: Ambient Artificial Memory",
-        "tokens": 136899400963,
-        "requests": 14654959
+        "tokens": 137861639931,
+        "requests": 14678115
       },
       {
         "rank": 13,
         "name": "Cursor",
-        "tokens": 112072994585,
-        "requests": 1018928
+        "tokens": 115194902117,
+        "requests": 1037717
       },
       {
         "rank": 14,
         "name": "Mira is the leading AI agent inside Telegram",
-        "tokens": 101999005874,
-        "requests": 5655351
+        "tokens": 97147044797,
+        "requests": 5493234
       },
       {
         "rank": 15,
         "name": "MavenBio",
-        "tokens": 95806170318,
-        "requests": 1308469
+        "tokens": 92960911570,
+        "requests": 1285179
       },
       {
         "rank": 16,
         "name": "LangChain",
-        "tokens": 79356531978,
-        "requests": 9522656
+        "tokens": 81339963393,
+        "requests": 9515743
       },
       {
         "rank": 17,
         "name": "GDevelop",
-        "tokens": 79255412568,
-        "requests": 2232961
+        "tokens": 78831595151,
+        "requests": 2242440
       },
       {
         "rank": 18,
         "name": "Zoo Code",
-        "tokens": 75071025994,
-        "requests": 909393
+        "tokens": 75085940753,
+        "requests": 943958
       },
       {
         "rank": 19,
         "name": "Endpoint Proxy",
-        "tokens": 64858949436,
-        "requests": 1586671
+        "tokens": 65229359514,
+        "requests": 1586954
       },
       {
         "rank": 20,
         "name": "SillyTavern",
-        "tokens": 64784283454,
-        "requests": 3835769
+        "tokens": 64628909480,
+        "requests": 3840935
       },
       {
         "rank": 21,
-        "name": "Oh-My-Pi",
-        "tokens": 64517749051,
-        "requests": 558173
+        "name": "HackerAI",
+        "tokens": 61284353966,
+        "requests": 1520354
       },
       {
         "rank": 22,
-        "name": "OpenHands",
-        "tokens": 63523869649,
-        "requests": 1294204
+        "name": "Oh-My-Pi",
+        "tokens": 61202197449,
+        "requests": 537131
       },
       {
         "rank": 23,
-        "name": "HackerAI",
-        "tokens": 61351184088,
-        "requests": 1517621
+        "name": "Zed Editor",
+        "tokens": 59505669133,
+        "requests": 590513
       },
       {
         "rank": 24,
         "name": "HammerAI",
-        "tokens": 58891742775,
-        "requests": 15766284
+        "tokens": 59421731325,
+        "requests": 15906960
       },
       {
         "rank": 25,
-        "name": "Zed Editor",
-        "tokens": 58280317750,
-        "requests": 574817
+        "name": "OpenHands",
+        "tokens": 52699834775,
+        "requests": 1086834
       }
     ],
-    "as_of": "2026-06-27T22:00:12.131Z"
+    "as_of": "2026-06-28T03:27:29.821Z"
   },
   "macro": [
     {
