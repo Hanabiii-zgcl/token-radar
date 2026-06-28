@@ -31,17 +31,9 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python3 fetch.py
 
-      - name: Commit refreshed data
-        run: |
-          git config user.name  "token-radar-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add -A data.js data/
-          if git diff --cached --quiet; then
-            echo "no changes"
-          else
-            git commit -m "data: refresh $(date -u +%FT%TZ)"
-            git push
-          fi
+      # 注: 不再把 data.js commit 回仓。data.js 由本次 run 现场构建并打进 Pages
+      # artifact 部署，省掉 bot 推送，避免和人工提交相撞。源数据(gpu.json/macro.json)
+      # 仍由人工提交进仓，fetch.py 每次从它们 + 实时 API 重建。
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
