@@ -150,6 +150,36 @@ if(G.series && Object.keys(G.series).length){
       yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v.toFixed(2)},splitLine:{lineStyle:{color:'#222b3a'}}},
       series:mseries});
   }
+
+  const TC = G.term_curves;
+  if(TC && TC.series){
+    card.appendChild($(`<div style="font-size:12px;color:#8b97a8;margin:20px 0 2px">H100 期限利率曲线 · 锁得越久租金越低${TC.as_of?(' · '+TC.as_of):''}</div>`));
+    card.appendChild($(`<div id="c_gpu_term" class="chart" style="height:190px"></div>`));
+    const TCOL={'2025-11-22':'#5a6678','2026-03-31':'#46c46a','2026-06-25':'#e0833f'};
+    const tser=Object.keys(TC.series).map(d=>({name:d,type:'line',smooth:true,symbol:'circle',symbolSize:4,
+      lineStyle:{width:1.6,color:TCOL[d]||'#888'},itemStyle:{color:TCOL[d]||'#888'},
+      data:TC.x.map((m,i)=>[m, TC.series[d][i]])}));
+    echarts.init(document.getElementById('c_gpu_term'),'dark').setOption({
+      grid:{left:50,right:16,top:26,bottom:32},
+      legend:{top:2,textStyle:{color:'#8b97a8',fontSize:10}},
+      tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toFixed(2):'—'},
+      xAxis:{type:'value',name:'期限(月)',nameLocation:'middle',nameGap:22,nameTextStyle:{color:'#8b97a8',fontSize:10},min:0,max:36,axisLabel:{color:'#8b97a8',fontSize:10}},
+      yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v.toFixed(2)},splitLine:{lineStyle:{color:'#222b3a'}}},
+      series:tser});
+  }
+  const RV = G.residual_value;
+  if(RV && RV.data){
+    card.appendChild($(`<div style="font-size:12px;color:#8b97a8;margin:18px 0 2px">H100 残值估计 · DCF (USD)${RV.as_of?(' · '+RV.as_of):''}</div>`));
+    card.appendChild($(`<div id="c_gpu_rv" class="chart" style="height:180px"></div>`));
+    echarts.init(document.getElementById('c_gpu_rv'),'dark').setOption({
+      grid:{left:56,right:16,top:12,bottom:22},
+      tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toLocaleString():'—'},
+      xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+      yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+(v/1000).toFixed(0)+'k'},splitLine:{lineStyle:{color:'#222b3a'}}},
+      series:[{type:'line',smooth:true,showSymbol:false,lineStyle:{width:1.6,color:'#b07cf0'},itemStyle:{color:'#b07cf0'},areaStyle:{opacity:0.08,color:'#b07cf0'},
+        data:RV.data.map(p=>[p.date,p.value])}]
+    });
+  }
 }
 
 // ============================================================ key banner
