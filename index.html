@@ -99,24 +99,27 @@ if(G.series && Object.keys(G.series).length){
   const sec=$(`<div></div>`);
   sec.appendChild($(`<h2>GPU 租赁价 · Silicon Data (Bloomberg)</h2>`));
   const card=$(`<div class="card"><div class="cs" style="margin-bottom:2px">${G.source||''} · 截至 ${G.as_of||''} · ${G.unit||''}</div>
-    <div style="font-size:12px;color:#8b97a8;margin:8px 0 2px">H100 SXM · SDH100RT</div><div id="c_gpu_h" class="chart" style="height:188px"></div>
+    <div style="font-size:12px;color:#8b97a8;margin:8px 0 2px">H100 + A100 · 非超大规模指数 (SDH100RT / SDA100RT)</div><div id="c_gpu_h" class="chart" style="height:200px"></div>
     <div style="font-size:12px;color:#8b97a8;margin:16px 0 2px">B200 · SDB200RT</div><div id="c_gpu_b" class="chart" style="height:188px"></div></div>`);
   sec.appendChild(card);
   root.appendChild(sec);
   const names=Object.keys(G.series);
-  function gpuChart(elid, nm, color){
+  function gpuChart(elid, specs){
+    const multi = specs.length>1;
     echarts.init(document.getElementById(elid),'dark').setOption({
-      grid:{left:52,right:18,top:12,bottom:22},
+      grid:{left:52,right:18,top:multi?28:12,bottom:22},
+      legend: multi?{top:2,textStyle:{color:'#8b97a8',fontSize:10}}:undefined,
       tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toFixed(2):'—'},
       xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
       yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v.toFixed(2)},splitLine:{lineStyle:{color:'#222b3a'}}},
-      series:[{type:'line',smooth:false,showSymbol:false,lineStyle:{width:1.4,color},
-        itemStyle:{color},areaStyle:{opacity:0.07,color},
-        data:G.series[nm].map(p=>[p.date,p.price])}]
+      series:specs.filter(s=>G.series[s.nm]).map(s=>({type:'line',name:s.nm,smooth:false,showSymbol:false,
+        lineStyle:{width:1.4,color:s.color},itemStyle:{color:s.color},
+        areaStyle:multi?undefined:{opacity:0.07,color:s.color},
+        data:G.series[s.nm].map(p=>[p.date,p.price])}))
     });
   }
-  gpuChart('c_gpu_h', names[0], '#5b9dff');
-  gpuChart('c_gpu_b', names[1], '#e0833f');
+  gpuChart('c_gpu_h', [{nm:'H100 (SDH100RT)',color:'#5b9dff'},{nm:'A100 (SDA100RT)',color:'#46c46a'}]);
+  gpuChart('c_gpu_b', [{nm:'B200 (SDB200RT)',color:'#e0833f'}]);
 
   const HM = G.h100_multi;
   if(HM && HM.series){
