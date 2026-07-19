@@ -12,6 +12,9 @@
 | 应用排名（按 token 的 app） | `GET /api/v1/datasets/app-rankings` | OpenRouter API key（Bearer） | ✅ |
 | 模型 landscape（339 模型/定价/发布） | `GET /api/v1/models` | 公开，无需 key | ✅ |
 | 宏观口径（Google 等第一方披露） | — | 手动 | 编辑 `data/macro.json` |
+| 对照源：ARR 外推 / Ornn OCPI GPU / Vercel Gateway / SDK 下载 / Epoch 数据中心 | Valliance AI Lab `data.js`（`fetch_valliance.py`） | 公开页面 | ✅ 每次刷新抓取 |
+
+> **对照源署名与边界**：对照源区块整体抓取自 [Valliance AI Lab · AI Monetization Tracker](https://www.valliance-ailab.com/ai-monetization-tracker/)（其自身为 self-hosted rebuild，上游：Ornn OCPI、Epoch AI CC-BY 4.0、Vercel leaderboards、npm/PyPI 公开 API），页面逐区标注。**ARR 是对方的外推估算模型，非公司披露值**。OpenRouter 数据本站一手拉取，不经对照源；对方的 KOL/新闻编辑内容不抓。对方数据多为滚动窗（GPU 91 天 / Gateway 61 天），`data/valliance-history.json` 逐日累积保留窗外历史。
 
 `rankings-daily` 支持 `start_date/end_date`，首次运行即回填 90 天历史 → 时间序列图第一天就有，不用等。
 

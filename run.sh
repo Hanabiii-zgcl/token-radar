@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 [ -f .env ] && export $(grep -v '^#' .env | xargs)
 
 python3 fetch.py
+python3 fetch_valliance.py || true   # 对照源抓取失败不阻塞本地看板
 echo
 echo ">> dashboard: http://localhost:8787"
 echo ">> Ctrl-C 退出"

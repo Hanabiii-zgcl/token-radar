@@ -6,6 +6,7 @@
 <title>Token Radar · AI token 使用追踪</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="data.js"></script>
+<script src="valliance.js"></script>
 <style>
   :root{
     --bg:#0b0e14; --panel:#141925; --panel2:#1b2230; --line:#222b3a;
@@ -67,6 +68,10 @@
 let D;
 try{ const _r = await fetch('data/latest.json?ts=' + Date.now(), {cache:'no-store'}); D = _r.ok ? await _r.json() : (window.__DATA__ || {}); }
 catch(_e){ D = window.__DATA__ || {}; }
+let V;
+try{ const _v = await fetch('data/valliance-latest.json?ts=' + Date.now(), {cache:'no-store'}); V = _v.ok ? await _v.json() : (window.__VDATA__ || null); }
+catch(_e){ V = window.__VDATA__ || null; }
+const VM = (V && V.modules) || {};
 const $ = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
 const root = document.getElementById('root');
 
@@ -91,7 +96,7 @@ const pcol=(p)=>PCOL[p]||'#'+(Math.abs([...p].reduce((a,c)=>a*31+c.charCodeAt(0)
 // ---- meta line ----
 const gen = D.generated_at ? new Date(D.generated_at).toLocaleString('zh-CN',{hour12:false}) : '—';
 document.getElementById('meta').innerHTML =
-  `数据更新于 <b>${gen}</b> · 数据源：OpenRouter datasets + models + Silicon Data(GPU) · 刷新由定时任务驱动`;
+  `数据更新于 <b>${gen}</b> · 数据源：OpenRouter datasets + models + Silicon Data(GPU) + 对照源(Valliance·每日抓取) · 刷新由定时任务驱动`;
 
 // ============================================================ GPU rental (TOP)
 const G = D.gpu||{};
@@ -180,6 +185,88 @@ if(G.series && Object.keys(G.series).length){
         data:RV.data.map(p=>[p.date,p.value])}]
     });
   }
+
+  // ---- Ornn OCPI 全 SKU（对照源，日频自动） ----
+  const OG = VM.gpu_ornn || {};
+  if(OG.series && Object.keys(OG.series).length){
+    card.appendChild($(`<div style="font-size:12px;color:#8b97a8;margin:20px 0 2px">Ornn OCPI 全 SKU · 日频<b>自动</b>抓取（vs 上方手工维护口径） · 截至 ${OG.as_of||''} · via <a href="https://www.valliance-ailab.com/ai-monetization-tracker/" target="_blank">Valliance</a></div>`));
+    card.appendChild($(`<div id="c_gpu_ornn" class="chart" style="height:230px"></div>`));
+    const OCOL={'H100 SXM':'#5b9dff','H200':'#46c46a','B200':'#e0833f','A100 SXM4':'#a982e6','RTX 5090':'#5a6678'};
+    echarts.init(document.getElementById('c_gpu_ornn'),'dark').setOption({
+      grid:{left:48,right:16,top:28,bottom:22},
+      legend:{top:2,textStyle:{color:'#8b97a8',fontSize:10},type:'scroll'},
+      tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toFixed(2):'—'},
+      xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+      yAxis:{type:'log',logBase:10,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v},splitLine:{lineStyle:{color:'#222b3a'}}},
+      series:Object.keys(OG.series).map(nm=>({name:nm,type:'line',smooth:false,showSymbol:false,
+        lineStyle:{width:1.4,color:OCOL[nm]||'#999'},itemStyle:{color:OCOL[nm]||'#999'},
+        data:OG.series[nm]}))
+    });
+  }
+}
+
+// ============================================================ ARR 实时外推（对照源）
+const AR = VM.arr || {};
+if(AR.companies && Object.keys(AR.companies).length){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>Frontier Lab ARR · 实时外推估算 <span class="tag">对照源 · via Valliance</span></h2>`));
+  const k=$(`<div class="kpis" style="margin-bottom:16px"></div>`);
+  const counters=[];
+  for(const [key,c] of Object.entries(AR.companies)){
+    const ct=c.counter||{};
+    k.appendChild($(`<div class="kpi"><div class="v" id="arr_v_${key}" style="font-variant-numeric:tabular-nums;font-size:22px">—</div>
+      <div class="l">${c.label||key} — estimated ARR</div>
+      <div class="d" id="arr_d_${key}" style="color:var(--mut)"></div></div>`));
+    counters.push([key,c,ct]);
+  }
+  sec.appendChild(k);
+  sec.appendChild($(`<div class="card"><h3>ARR 轨迹</h3><div class="cs">实线=历史 · 虚线=外推 · 阴影=不确定带 · ◆=公开报道对照点 · <b>估算模型，非披露值</b> · 模型更新 ${AR.updated||''}</div><div id="c_arr" class="chart tall"></div></div>`));
+  root.appendChild(sec);
+
+  function arrTick(){
+    const now=Date.now();
+    for(const [key,c,ct] of counters){
+      if(ct.vLast==null||ct.rMs==null||ct.tLast==null) continue;
+      const v = ct.vLast*Math.exp(ct.rMs*(now-ct.tLast));            // $B
+      const perHr = v*(Math.exp(ct.rMs*3.6e6)-1)*1e9;                // $/hr
+      const yoy = c.yoyDen ? (v/c.yoyDen-1)*100 : null;
+      const ve=document.getElementById('arr_v_'+key), de=document.getElementById('arr_d_'+key);
+      if(!ve) continue;
+      ve.textContent = '$'+(v*1e9).toLocaleString('en-US',{maximumFractionDigits:0});
+      de.innerHTML = `+$${perHr.toLocaleString('en-US',{maximumFractionDigits:0})}/hr`+(yoy!=null?` · Y/Y +${yoy.toFixed(0)}%`:'');
+    }
+  }
+  arrTick(); setInterval(arrTick, 1000);
+
+  const aser=[], alegend=[];
+  for(const [key,c] of Object.entries(AR.companies)){
+    const col=c.color||(key==='anthropic'?'#d4a373':'#10a37f');
+    const lb=c.label||key; alegend.push(lb);
+    aser.push({name:lb,type:'line',showSymbol:false,smooth:true,
+      lineStyle:{width:2,color:col},itemStyle:{color:col},data:c.hist||[]});
+    aser.push({name:lb+'·外推',type:'line',showSymbol:false,smooth:true,
+      lineStyle:{width:1.6,color:col,type:'dashed'},itemStyle:{color:col},data:c.ext||[]});
+    if(c.fanLo&&c.fanHi&&c.fanLo.length===c.fanHi.length&&c.fanLo.length){
+      aser.push({name:lb+'·bandlo',type:'line',stack:'fan_'+key,showSymbol:false,silent:true,
+        lineStyle:{opacity:0},itemStyle:{color:col},data:c.fanLo,tooltip:{show:false}});
+      aser.push({name:lb+'·band',type:'line',stack:'fan_'+key,showSymbol:false,silent:true,
+        lineStyle:{opacity:0},areaStyle:{color:col,opacity:0.10},itemStyle:{color:col},
+        data:c.fanHi.map((p,i)=>[p[0],p[1]-c.fanLo[i][1]]),tooltip:{show:false}});
+    }
+    if(c.cps&&c.cps.length){
+      aser.push({name:lb+'·对照点',type:'scatter',symbol:'diamond',symbolSize:9,
+        itemStyle:{color:col,borderColor:'#e6edf3',borderWidth:1},
+        tooltip:{formatter:(p)=>(p.data.src?p.data.src+' · ':'')+'$'+p.data.value[1]+'B'},
+        data:c.cps.map(p=>({value:[p.t,p.v],src:p.src}))});
+    }
+  }
+  echarts.init(document.getElementById('c_arr'),'dark').setOption({
+    grid:{left:56,right:20,top:30,bottom:26},
+    legend:{top:0,data:alegend,textStyle:{color:'#8b97a8',fontSize:10}},
+    tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?'$'+(+v).toFixed(1)+'B':'—'},
+    xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+    yAxis:{type:'value',scale:true,axisLabel:{color:'#8b97a8',formatter:(v)=>'$'+v+'B'},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series:aser});
 }
 
 // ============================================================ key banner
@@ -329,6 +416,103 @@ if(M.length){
   card.appendChild($(`<div class="footnote">这些是<b>非自动</b>、需人工核实的参考量，编辑 <code style="color:#ffd479">data/macro.json</code> 维护。用于把 OpenRouter 的聚合层放回市场总量背景里。</div>`));
   sec.appendChild(card);
   root.appendChild(sec);
+}
+
+// ============================================================ Vercel Gateway（对照源）
+const VC = VM.vercel || {};
+if(VC.snapshots && VC.snapshots.length){
+  const snap=VC.snapshots[VC.snapshots.length-1];
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>Vercel AI Gateway 份额 <span class="tag">对照源 · via Valliance</span></h2>`));
+  const g=$(`<div class="grid g2"></div>`);
+  g.appendChild($(`<div class="card"><h3>Token 份额 Top10</h3><div class="cs">${snap.date} · 量的口径</div><div id="c_vc_tok" class="chart"></div></div>`));
+  g.appendChild($(`<div class="card"><h3>$ Spend 份额 Top10</h3><div class="cs">${snap.date} · 钱的口径（价×量）</div><div id="c_vc_spd" class="chart"></div></div>`));
+  sec.appendChild(g);
+  const hist=(VC.history&&VC.history.tokens)||{}, chist=(VC.history&&VC.history.cost)||{};
+  const fam='Claude (family)';
+  const hasFam=hist.days&&hist.series&&hist.series[fam];
+  if(hasFam){
+    sec.appendChild($(`<div class="card" style="margin-top:16px"><h3>Claude 系份额历史</h3><div class="cs">Token vs $ Spend · 逐日 · 两条线的裂口 = 单价溢价</div><div id="c_vc_hist" class="chart"></div></div>`));
+  }
+  root.appendChild(sec);
+  const hbar=(elid,rows,color)=>{const top=(rows||[]).slice(0,10).reverse();
+    echarts.init(document.getElementById(elid),'dark').setOption({
+      ...baseGrid({left:150}), tooltip:{trigger:'axis',valueFormatter:(v)=>v+'%',axisPointer:{type:'shadow'}},
+      xAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:(v)=>v+'%'},splitLine:{lineStyle:{color:'#222b3a'}}},
+      yAxis:{type:'category',data:top.map(r=>r[0]),axisLabel:{color:'#c9d4e2',fontSize:11}},
+      series:[{type:'bar',data:top.map(r=>r[1]),itemStyle:{color,borderRadius:[0,4,4,0]}}]});};
+  hbar('c_vc_tok', snap.token_share, '#5b9dff');
+  hbar('c_vc_spd', snap.spend_share, '#d4a373');
+  if(hasFam){
+    const mk=(blk)=>((blk&&blk.days)||[]).map((d,i)=>[d,((blk.series||{})[fam]||[])[i]]);
+    echarts.init(document.getElementById('c_vc_hist'),'dark').setOption({
+      ...baseGrid(), legend:{top:0,textStyle:{color:'#8b97a8',fontSize:10}},
+      tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?(+v).toFixed(1)+'%':'—'},
+      xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+      yAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:(v)=>v+'%'},splitLine:{lineStyle:{color:'#222b3a'}}},
+      series:[{name:'Token 份额',type:'line',smooth:true,showSymbol:false,lineStyle:{width:1.8,color:'#5b9dff'},itemStyle:{color:'#5b9dff'},data:mk(hist)},
+              {name:'$ Spend 份额',type:'line',smooth:true,showSymbol:false,lineStyle:{width:1.8,color:'#d4a373'},itemStyle:{color:'#d4a373'},data:mk(chist)}]});
+  }
+}
+
+// ============================================================ SDK 下载量（对照源）
+const SD = VM.sdk || {};
+if(SD.npm || SD.pypi){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>SDK 下载量 · adoption proxy <span class="tag">对照源 · via Valliance</span></h2>`));
+  sec.appendChild($(`<div class="card"><h3>npm + PyPI${SD.unit?(' · '+SD.unit):''}</h3><div class="cs">${SD.note||''}</div><div id="c_sdk" class="chart"></div></div>`));
+  root.appendChild(sec);
+  const lines=[];
+  const add=(obj,tag,colmap)=>{for(const [pkg,sv] of Object.entries(obj||{})){
+    lines.push({name:`${tag}:${pkg}`,type:'line',smooth:true,showSymbol:false,
+      lineStyle:{width:1.4,color:colmap[pkg]||'#888'},itemStyle:{color:colmap[pkg]||'#888'},data:sv});}};
+  add(SD.npm,'npm',{'openai':'#10a37f','@anthropic-ai/sdk':'#d4a373'});
+  add(SD.pypi,'pypi',{'openai':'#0b8f6f','anthropic':'#8a5a2b'});
+  echarts.init(document.getElementById('c_sdk'),'dark').setOption({
+    ...baseGrid(), legend:{top:0,textStyle:{color:'#8b97a8',fontSize:10},type:'scroll'},
+    tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?(+v).toFixed(2)+'M':'—'},
+    xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+    yAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:(v)=>v+'M'},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series:lines});
+}
+
+// ============================================================ 数据中心（Epoch via 对照源）
+const DC = VM.datacenters || {};
+if(DC.totals){
+  const sec=$(`<div></div>`);
+  sec.appendChild($(`<h2>AI 数据中心建设 · Epoch AI <span class="tag">对照源 · via Valliance</span></h2>`));
+  const k=$(`<div class="kpis" style="margin-bottom:16px"></div>`);
+  [['覆盖 Sites',DC.totals.sites,'卫星影像+permits 样本'],
+   ['IT Power',(DC.totals.it_power_gw!=null?DC.totals.it_power_gw:'—')+' GW','设施总功耗另 +20–50%'],
+   ['算力存量',(DC.totals.h100_eq_m!=null?DC.totals.h100_eq_m:'—')+'M H100-eq','覆盖样本内累计']]
+    .forEach(([l,v,d])=>k.appendChild($(`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="d" style="color:var(--mut)">${d}</div></div>`)));
+  sec.appendChild(k);
+  const g=$(`<div class="grid g2"></div>`);
+  g.appendChild($(`<div class="card"><h3>Top Sites by IT Power</h3><div class="cs">截至 ${DC.as_of||''} · Epoch CC-BY 4.0</div><div style="max-height:330px;overflow:auto"><table><thead><tr><th>Site</th><th>Owner</th><th>User</th><th class="num">MW</th><th class="num">kH100e</th></tr></thead><tbody id="dc_tb"></tbody></table></div></div>`));
+  g.appendChild($(`<div class="card"><h3>行业累计装机（MW）</h3><div class="cs">前向填充加总 · 当月之后为规划推算（虚线）</div><div id="c_dc" class="chart"></div></div>`));
+  sec.appendChild(g);
+  root.appendChild(sec);
+  const tb=sec.querySelector('#dc_tb');
+  (DC.top_sites||[]).slice(0,12).forEach(s=>tb.appendChild($(`<tr><td>${s.name}</td><td><span class="tag">${s.owner}</span></td><td style="color:var(--mut);font-size:12px">${s.user||'—'}</td><td class="num">${s.mw}</td><td class="num">${s.h100e_k}</td></tr>`)));
+  const tl=DC.industry_timeline||[], cut=(DC.as_of||'9999').slice(0,7);
+  const solid=tl.filter(r=>r[0]<=cut), dash=tl.filter(r=>r[0]>=cut);
+  echarts.init(document.getElementById('c_dc'),'dark').setOption({
+    ...baseGrid(), legend:{top:0,textStyle:{color:'#8b97a8',fontSize:10}},
+    tooltip:{trigger:'axis',valueFormatter:(v)=>v!=null?(+v).toLocaleString()+' MW':'—'},
+    xAxis:{type:'time',axisLabel:{color:'#8b97a8',fontSize:10}},
+    yAxis:{type:'value',axisLabel:{color:'#8b97a8',formatter:hum},splitLine:{lineStyle:{color:'#222b3a'}}},
+    series:[{name:'IT Power',type:'line',smooth:true,showSymbol:false,lineStyle:{width:1.8,color:'#5b9dff'},itemStyle:{color:'#5b9dff'},areaStyle:{opacity:.08,color:'#5b9dff'},data:solid.map(r=>[r[0]+'-01',r[1]])},
+            {name:'IT Power·规划',type:'line',smooth:true,showSymbol:false,lineStyle:{width:1.4,color:'#5b9dff',type:'dashed'},itemStyle:{color:'#5b9dff'},data:dash.map(r=>[r[0]+'-01',r[1]])}]});
+}
+
+// ============================================================ 对照源署名
+if(V){
+  root.appendChild($(`<div class="footnote" style="margin-top:18px">对照源署名：标有「对照源」的区块每日自动抓取自
+  <a href="https://www.valliance-ailab.com/ai-monetization-tracker/" target="_blank">Valliance AI Lab · AI Monetization Tracker</a>（self-hosted rebuild）。
+  其上游：GPU 租赁价 = Ornn Compute Price Index (OCPI)；数据中心 = <a href="https://epoch.ai/data/ai-data-centers" target="_blank">Epoch AI</a>（CC-BY 4.0）；
+  Gateway 份额 = Vercel AI Gateway Leaderboards；SDK = npm / PyPI 公开 API。
+  <b>ARR 为 Valliance 的外推估算模型，非公司披露值</b>；OpenRouter 数据本站为一手拉取，不经对照源。
+  抓取时间 ${V.fetched_at?new Date(V.fetched_at).toLocaleString('zh-CN',{hour12:false}):'—'}。</div>`));
 }
 
 // ---- chart helpers ----

@@ -31,9 +31,30 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python3 fetch.py
 
-      # 注: 不再把 data.js commit 回仓。data.js 由本次 run 现场构建并打进 Pages
-      # artifact 部署，省掉 bot 推送，避免和人工提交相撞。源数据(gpu.json/macro.json)
-      # 仍由人工提交进仓，fetch.py 每次从它们 + 实时 API 重建。
+      - name: Fetch Valliance cross-source (对照源)
+        run: python3 fetch_valliance.py
+
+      # 注: data.js 仍不 commit 回仓（现场构建进 Pages artifact）。
+      # 但以下两类"不落仓就永久丢失"的数据改为 bot 提交：
+      #   1) valliance 对照源（latest/history/valliance.js）——对方是滚动窗，历史靠我们自己攒；
+      #   2) 快照归档（apps 原样、rankings gzip）——修复 6-28 改造后 >90 天历史流失的回归。
+      # 防相撞：commit 后 autostash rebase 再 push + 顶部 concurrency 串行。
+      - name: Commit accumulated data back to repo
+        run: |
+          day=$(date -u +%F)
+          if [ -f "data/snapshots/rankings-$day.json" ]; then gzip -kf "data/snapshots/rankings-$day.json"; fi
+          git config user.name "token-radar-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/valliance-latest.json data/valliance-history.json valliance.js || true
+          git add data/snapshots/apps-*.json || true
+          git add data/snapshots/rankings-*.json.gz || true
+          if git diff --cached --quiet; then
+            echo "no data changes to commit"
+          else
+            git commit -m "data: cross-source + snapshot archive $(date -u +%FT%H:%MZ)"
+            git -c rebase.autoStash=true pull --rebase origin main
+            git push origin main
+          fi
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
